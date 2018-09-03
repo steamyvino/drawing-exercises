@@ -112,19 +112,15 @@ public class Snake implements ActionListener {
     {
       
         public void keyPressed(KeyEvent ke) {
-            if(ke.getKeyCode()==KeyEvent.VK_UP)
+            if(ke.getKeyCode()==KeyEvent.VK_UP&&direction!=DOWN)
                 direction=0;
-            if(ke.getKeyCode()==KeyEvent.VK_DOWN)
+            if(ke.getKeyCode()==KeyEvent.VK_DOWN&&direction!=UP)
                 direction=1;
-            if(ke.getKeyCode()==KeyEvent.VK_LEFT)
+            if(ke.getKeyCode()==KeyEvent.VK_LEFT&&direction!=RIGHT)
                 direction=2;
-            if(ke.getKeyCode()==KeyEvent.VK_RIGHT)
-                direction=3;
-            if(ke.getKeyCode()==KeyEvent.VK_ENTER)
-            {
-                snakeParts.add(new Point(head.x,head.y));
-                scored=true;             
-            }
+            if(ke.getKeyCode()==KeyEvent.VK_RIGHT&&direction!=LEFT)
+                direction=3;    
+           
         }
         
     }
@@ -133,13 +129,13 @@ public class Snake implements ActionListener {
     {
           Point headf = snakeParts.get(snakeParts.size()-1);
 
-          System.out.println("apple x= " + apple.x+" apple y= "+ apple.y);
-          System.out.println("head x= " + headf.x+" head y= "+ headf.y);
+//          System.out.println("apple x= " + apple.x+" apple y= "+ apple.y);
+//          System.out.println("head x= " + headf.x+" head y= "+ headf.y);
            if (headf.equals(new Point(apple.x,apple.y)))
            {
                snakeParts.add(new Point(head.x,head.y));
                scored=true;
-               apple.Eat();
+               apple.eat(snakeParts);
            }    
  
     }
@@ -201,12 +197,19 @@ class Apple
     int y;
     static boolean eaten=false;
     
-    void Eat()
+    void eat(ArrayList<Point> snakeParts)
     {
-        
+        playSound();
         x=rand.nextInt(27)*10;
         y=rand.nextInt(25)*10;
-        playSound();
+        for(int i=0;i<snakeParts.size();i++)
+            if(x==snakeParts.get(i).x && y==snakeParts.get(i).y)
+            {    
+                System.out.println("INSIDE SNAKE");
+                eat(snakeParts);
+
+            }
+
     
     }
 
