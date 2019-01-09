@@ -49,19 +49,36 @@ public class Main extends JFrame {
                stopAnimation();
             }
         });
+        
+        JButton addButton = (JButton)buttonPanel.add(new JButton("Add"));
+        addButton.setIcon(btnIcon);
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               addAnimation();
+            }
+        });
+        
+        
+        
     
     }
     
     public void startAnimation()
     {
-        
-        animationPanel.addBall();
-    
+        animationPanel.start();
+      
     }
     public void stopAnimation()
     {
         
        animationPanel.stop();
+    
+    }
+    public void addAnimation()
+    {
+    
+      animationPanel.addBall();
     
     }
 
@@ -71,8 +88,8 @@ public class Main extends JFrame {
         ArrayList<Ball> ballList = new ArrayList<Ball> ();
         Thread animThread;
         ThreadGroup threadGroup = new ThreadGroup("Ball");
-        
-       
+        private volatile boolean stopped = false;
+        private Object lock= new Object();
         
         public void addBall()
         {
@@ -85,7 +102,22 @@ public class Main extends JFrame {
         public void stop()
         {
         
-          threadGroup.interrupt();
+            stopped=true;
+        
+        }
+        
+        public void start()
+        {
+        
+            if(stopped)
+            {
+                stopped=false;
+                synchronized(lock)
+                {
+                    lock.notifyAll();      
+                }
+            
+            }
         
         }
         
@@ -116,28 +148,42 @@ public class Main extends JFrame {
             @Override
             public void run() 
             {
-  
-                try 
-                {    
-                    while (!Thread.currentThread().isInterrupted())
+
+                    while (true)
                     {
-                        repaint();
-
-                           ball.moveBall(animationPanel);
-
-
-                                Thread.sleep(5);
+                        synchronized(lock)
+                        {
+                            while(stopped)
+                            {
+                            
+                                try 
+                                {
+                                    lock.wait();
+                                } 
+                                catch (InterruptedException ex)
+                                {
+                                     ex.printStackTrace();
+                                }
+                                
+                            }
+                        }
+         
+                            ball.moveBall(animationPanel);
+                            repaint();
+                        
+                        try {
+                           
+                            Thread.sleep(5);
+                        }
+                        catch (InterruptedException ex)
+                        {
+                           ex.printStackTrace();
+                        }
                     }
                 }   
-                catch (InterruptedException ex) 
-                {
-                    System.out.println(ex.getMessage());
-                    ballList.clear();
-                    repaint();
-                   
-                }
+                
      
-            }
+            
         }
      
 
